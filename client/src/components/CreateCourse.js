@@ -1,20 +1,17 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Buffer } from 'buffer';
-// import {Context} from '../Context';
 import Form from './Form';
 
 export default function CreateCourse({context}) {
 
     let history = useHistory();
-    // let context = useContext(Context.Context);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [estimatedTime, setEstimatedTime] = useState('');
     const [materialsNeeded, setMaterialsNeeded] = useState('');
     const [errors, setErrors] = useState([]);
 
-    //** Renders the HTML **/
     return (
         <main>
             <div className="wrap">
@@ -56,7 +53,6 @@ export default function CreateCourse({context}) {
         </main>
     );
 
-    //**  HELPER FUNCTIONS **//
     function cancel() {
         history.push('/courses');
     }
@@ -71,8 +67,7 @@ export default function CreateCourse({context}) {
         };
 
         const body = JSON.stringify(course);
-        // Creates errors to display on page. If there are no errors,
-        // send a POST data request.
+        // Creates errors to display on page
         let myErrors = [];
         if(!title || !description) {
             if (!title) {
@@ -93,7 +88,6 @@ export default function CreateCourse({context}) {
             })
                 .then( response => {
                     if (response.status === 201) {
-                        console.log("New course was added!");
                     } else if (response.status === 400){
                         response.json().then(data => {
                             return {errors: [data.errors]};
@@ -104,7 +98,7 @@ export default function CreateCourse({context}) {
                         throw new Error();
                     }
                 })
-            history.push('/courses');
+            // history.push('/courses');
         }
     }  
 

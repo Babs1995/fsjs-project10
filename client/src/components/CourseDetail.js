@@ -6,31 +6,39 @@ import { Buffer } from "buffer";
 export default function CourseDetail( {context}) {
 
     let history = useHistory();
-    // const context = useContext(Context.Context);
     const [course, setCourse] = useState([]);
     const { id } = useParams();
+    const authUser = context.authUser;
     
     // Fetches course information for this id.
     useEffect(() => {
-        const fetchData = async() => {
-            try {
-                const response = await fetch(`http://localhost:5000/api/courses/${id}`);
-                if(response.status === 200) {
-                    const json = await response.json();
-                    setCourse(json);
-                } else if (response.status === 500) {
-                    history.push('/error');
-                } else {
-                    history.push('/notfound');
-                }
-            } catch (err) {
-                console.log("error", err)
-            }
-        };
-        fetchData();
-    }, [id, history]);
+        function fetchData() {
+            fetch(`http://localhost:5000/api/courses/${id}`)
+            .then ((response) => response.json())
+            .then ((data) => setCourse(data.courses))
+            .catch(err => console.log('Oh no!', err))
+        }
+            fetchData();
+        });
 
-    //** Renders the HTML **/
+
+    // Deletes course when the button is pressed and user and course owner is authenticated.
+    function deleteCourse() {
+        fetch(`http://localhost:5000/api/courses/${id}`, { 
+            method: 'DELETE',
+            headers: {
+                'Authorization':
+                    "Basic " + Buffer.from(`${authUser.emailAddress}:${authUser.password}`).toString("/base64"),
+                "Content-Type": "application/json"
+            },
+                body: null,
+            }
+            )
+            .then(res => res.json())
+            .then(history.push("/"))
+            .catch(err => console.log(err))
+        } 
+        deleteCourse();    
     return ( 
             <main>
             {/* Displays Update, Delete and Return to List buttons if user is authenticated
@@ -42,7 +50,7 @@ export default function CourseDetail( {context}) {
                             (context.authUSer.id===course.user.id) ?
                                 <React.Fragment>
                                     <Link className="button" to={`/courses/${id}/updated`}>Update Course</Link>
-                                    <Link className="button" to='/courses/' onClick={deleteACourse}>Delete Course</Link>
+                                    <Link className="button" to='/courses/' onClick={deleteCourse}>Delete Course</Link>
                                     <Link className="button button-secondary" to="/courses">Return to List</Link>
                                 </React.Fragment>
                             : 
@@ -77,30 +85,4 @@ export default function CourseDetail( {context}) {
                     </form>
                 </div>
             </main>
-    );
-
-    //**  HELPER FUNCTION **// 
-    // Deletes a course when the button is pressed IF 
-    // the user is authenticated and the owner of the course.
-    function deleteACourse() {
-        fetch(`http://localhost:5000/api/courses/${id}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json",
-                'Authorization': 'Basic ' + Buffer.from(
-                    `${context.authUser.emailAddress}:${context.authUser.password}`
-                  ).toString("base64") },
-            body: null,  
-        })
-        .then( response => {
-            if (response.status === 204) {
-                console.log("Course was deleted!");
-            } else if (response.status === 400){
-                response.json().then(data => {
-                    return data.errors;
-                });
-            } else {
-                throw new Error();
-            }
-        })
-    }
-}
+)}

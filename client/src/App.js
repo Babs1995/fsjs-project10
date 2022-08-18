@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 import Header from './components/Header';
 import Courses from './components/Courses';
+import Teachers from './components/data/teachers';
 import CreateCourse from './components/CreateCourse';
 import UpdatedCourse from './components/UpdatedCourse';
 import CourseDetail from './components/CourseDetail';
@@ -35,6 +36,7 @@ export default function App() {
       <Switch>
         <Route exact path='/' component={Courses} />
         <Route exact path='/courses' component={Courses} />
+        <Route exact path='/teachers' component={Teachers} />
         <PrivateRoute path="/courses/create" component={CreateCourseWithContext} />
         <PrivateRoute path ='/courses/:id/update' component={UpdatedCourse} />
         <Route exact path='/courses/:id' component={CourseDetail} />

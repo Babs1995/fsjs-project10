@@ -18,7 +18,7 @@ export default (props) => {
     event.preventDefault();
     cancel();
   }
-  //** Renders the HTML **/
+
   return (
     <div>
       <ErrorsDisplay errors={errors} />
@@ -33,8 +33,6 @@ export default (props) => {
   );
 }
 
-// HELPER FUNCTION //
-// Displays form errors
 function ErrorsDisplay({ errors }) {
   let errorsDisplay = null;
 

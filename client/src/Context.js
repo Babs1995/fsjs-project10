@@ -1,49 +1,18 @@
-import React, { Component } from 'react';
-import Cookies from 'js-cookie';
-import Data from './Data';
+import React, { useState } from "react";
+import Data from "./Data";
+import Cookies from "js-cookie";
 
-const Context = React.createContext(); 
+export const Context = React.createContext();
 
-export class Provider extends Component {
+export const Provider = (props) => {
+  const data = new Data();
+  const cookie = Cookies.get("auth-user");
 
-  state = {
-    authUser: null,
-    courses: []
-  };
+  const [authUser] = useState(cookie ? JSON.parse(cookie) : null);
+  const [auth] = useState(authUser ? true : false);
 
-  constructor() {
-    super();
-    this.data = new Data();
-    this.cookie = Cookies.get('auth-user');
-
-    this.state = {
-      authUser: this.cookie ? JSON.parse(this.cookie) : null
-    };
-  }
-
-  render() {
-    const {authUser} = this.state;
-    const courses = this.state;
-
-    const value = {
-      authUser,
-      courses,
-      data: this.data,
-      actions: { 
-        signIn: this.signIn,
-        signOut: this.signOut
-       }
-    };
-
-    return (
-      <Context.Provider value={value}>
-        {this.props.children}
-      </Context.Provider>  
-    );
-  }
-  
-  signIn = async (emailAddress, password) => {
-    const user = await this.data.getUser(emailAddress, password); // returns name and username
+  const signIn = async (emailAddress, password) => {
+    const user = await this.data.getUser(emailAddress, password);
     if (user !== null) {
       user.password = password;
       this.setState(() => {
@@ -51,20 +20,32 @@ export class Provider extends Component {
           authUser: user,
         };
       });
-      Cookies.set('auth-user', JSON.stringify(user), {expires: 1});
+      Cookies.set("auth-user", JSON.stringify(user), { expires: 1 });
     }
     return user;
-  }
+  };
 
-  signOut = () => {
+  const signOut = () => {
     this.setState(() => {
       return {
         authUser: null,
-      }
+      };
     });
-    Cookies.remove('auth-user');
-  }
-}
+    Cookies.remove("auth-user");
+  };
+
+  const value = {
+    authUser,
+    auth,
+    data,
+    actions: {
+      signIn,
+      signOut,
+    },
+  };
+
+  return <Context.Provider value={value}>{props.children}</Context.Provider>;
+};
 
 export const Consumer = Context.Consumer;
 
@@ -78,8 +59,8 @@ export function withContext(Component) {
   return function ContextComponent(props) {
     return (
       <Context.Consumer>
-        {context => <Component {...props} context={context} />}
+        {(context) => <Component {...props} context={context} />}
       </Context.Consumer>
     );
-  }
+  };
 }
